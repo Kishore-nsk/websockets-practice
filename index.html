@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Webpage Title</title>
+    </head>
+    <body>
+        <input type="text" placeholder="Enter your name" id="name" />
+        <input type="text" id="message" />
+        <button onclick="sendMessage()">Send</button>
+        <div id="responses"></div>
+        <script>
+            const ws = new WebSocket("ws://localhost:8080");
+
+            ws.addEventListener("message", (event) => {
+                try {
+                    const paragraph = document.createElement("p");
+                    const parent = document.getElementById("responses");
+                    const messageData = JSON.parse(event.data);
+                    paragraph.innerText = `${messageData.name}: ${messageData.message}`;
+                    parent.appendChild(paragraph);
+                } catch (error) {
+                    console.error(`Error receiving message: ${error}`);
+                }
+            });
+
+            const sendMessage = () => {
+                const message = document.getElementById("message").value;
+                const name = document.getElementById("name").value;
+                if (message.length === 0) {
+                    return;
+                } else {
+                    const dataToSend = JSON.stringify({
+                        name: name,
+                        message: message,
+                    });
+                    ws.send(dataToSend);
+                }
+            };
+        </script>
+    </body>
+</html>
